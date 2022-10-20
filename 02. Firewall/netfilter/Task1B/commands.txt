@@ -1,0 +1,29 @@
+sudo insmod module_name.ko (inserting a module)
+
+lsmod | grep module_name (list modules)
+
+sudo rmmod module_name (remove the module)
+
+dmesg (check the messages)
+
+tail -f /var/log/syslog (better mode to check messages)
+
+##########################################################
+
+How to run:
+
+1. rinominare il file che si vuole caricare nel kernel seedFilter.c
+
+2. eseguire l'utility make: "make"
+
+3. make ins
+
+4. fare i test dai container per vedere se il traffico viene fermato
+
+4a. visualizzare i log: "tail -f /var/log/syslog"
+
+5. rimuovere il modulo dal kernel: "make rm"
+
+6. controllare che il modulo sia stato rimosso: 
+- lsmod | grep module_name
+- vedere nei log che sia stato stampato il messaggio: "The filters are being removed."
