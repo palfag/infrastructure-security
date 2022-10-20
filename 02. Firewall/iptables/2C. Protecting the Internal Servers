@@ -1,0 +1,14 @@
+Protecting internal servers
+
+1. All the internal hosts run a telnet server (listening to port 23). Outside hosts can only access the telnet
+server on 192.168.60.5, not the other internal hosts.
+2. Outside hosts cannot access other internal servers.
+3. Internal hosts can access all the internal servers.
+4. Internal hosts cannot access external servers.
+5. In this task, the connection tracking mechanism is not allowed. It will be used in a later task.
+
+
+iptables -A FORWARD -p tcp -s 10.9.0.0/24 -d 192.168.60.5 --dport 23  -j ACCEPT
+iptables -A FORWARD -p tcp -s 10.9.0.0/24 -d 192.168.60.0/24 --dport 23  -j DROP
+iptables -A FORWARD -p tcp -s 192.168.60.0/24 -d 10.9.0.0/24 --dport 23  -j DROP
+
