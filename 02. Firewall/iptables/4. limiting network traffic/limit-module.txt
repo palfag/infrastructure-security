@@ -1,0 +1,7 @@
+resource: https://thelowedown.wordpress.com/2008/07/03/iptables-how-to-use-the-limits-module/
+
+iptables -A FORWARD -s 10.9.0.5 -m limit --limit 10/minute --limit-burst 5 -j ACCEPT 
+iptables -A FORWARD -s 10.9.0.5 -j DROP
+
+effettivamente dopo che 10.9.0.5 invia 5 pacchetti di fila, viene azionato il limite dei 10 pacchetti al minuto.
+
