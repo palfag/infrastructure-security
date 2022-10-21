@@ -1,0 +1,33 @@
+
+1. All the internal hosts run a telnet server (listening to port 23). Outside hosts can only access the telnet
+server on 192.168.60.5, not the other internal hosts.
+
+2. Outside hosts cannot access other internal servers.
+
+3. Internal hosts can access all the internal servers.
+
+4. Internal hosts can visit any external server.
+
+5. The connection tracking mechanism must be used.
+
+
+ip addr
+# External Network NIC
+15: eth0@if16: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:0a:09:00:0b brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 10.9.0.11/24 brd 10.9.0.255 scope global eth0
+       valid_lft forever preferred_lft forever
+
+# Internal Network NIC
+17: eth1@if18: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default 
+    link/ether 02:42:c0:a8:3c:0b brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 192.168.60.11/24 brd 192.168.60.255 scope global eth1
+       valid_lft forever preferred_lft forever
+
+
+
+iptables -A FORWARD -p tcp -i eth0 -o eth1 -d 192.168.60.5 --dport 23  -j ACCEPT
+iptables -A FORWARD -p tcp -i eth1 -o eth0 --dport 23  -j ACCEPT
+iptables -A FORWARD -p tcp -i eth1 -o eth0 -s 192.168.60.5 --sport 23 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -p tcp -i eth0 -o eth1 --sport 23 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -P FORWARD DROP
