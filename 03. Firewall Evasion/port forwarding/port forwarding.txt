@@ -1,0 +1,62 @@
+0. blocco 3 domini usando iptables
+
+iptables -A FORWARD -i eth1 -d 93.184.216.0/24 -j DROP (example.com)
+iptables -A FORWARD -i eth1 -d 142.250.180.0/20 -j DROP (google.com)
+iptables -A FORWARD -i eth1 -d 157.240.231.0/24 -j DROP (facebook.com)
+
+
+1. static port forwarding
+
+## settare il tunnel ssh da A a B
+ssh -L 0.0.0.0:8000:192.168.20.5:23 seed@192.168.20.99
+
+## aprire un altro terminale da A e lanciare il comando telnet localhost 8000
+
+## vedremo che risponderà con il seguente banner 
+
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+Ubuntu 20.04.1 LTS
+
+## ci logghiamo e vediamo digitando il comando "hostname -I" che siamo riusciti a raggiungere B1 e quindi ad aggirare il firewall
+seed@d74b8f740394:~$ hostname -I
+192.168.20.5 
+
+
+
+2. dynamic port forwarding
+
+## senza lo static port forwarding, come fa il proxy a sapere la destinazione finale?
+## questo richiede un protocollo addizionale tra il mio client e il mio proxy
+## il dynamic port forwarding non è supportato da tutte le applicazioni (es telnet non lo supporta, i browser si)
+## I browser lo supportano, e possono dire la destinazione al proxy usando un particolare protocollo chiamato SOCKS
+## SOCKS: il client può dire al server (proxy) la destinazione finale
+
+## settare il tunnel ssh da B ad A
+ssh -D 0.0.0.0:9000 seed@10.8.0.99
+
+## lanciare le curl specificando il proxy B (curl lanciate da B)
+curl --proxy socks5h://0.0.0.0:9000 www.example.com
+curl --proxy socks5h://0.0.0.0:9000 www.google.com
+curl --proxy socks5h://0.0.0.0:9000 https://www.facebook.com
+
+## lanciare le curl specificando il proxy B (curl lanciate da B1)
+curl --proxy socks5h://192.168.20.99:9000 www.example.com
+curl --proxy socks5h://192.168.20.99:9000 www.google.com
+curl --proxy socks5h://192.168.20.99:9000 https://www.facebook.com
+
+## lanciare le curl specificando il proxy B (curl lanciate da B2)
+curl --proxy socks5h://192.168.20.99:9000 www.example.com
+curl --proxy socks5h://192.168.20.99:9000 www.google.com
+curl --proxy socks5h://192.168.20.99:9000 https://www.facebook.com
+
+
+2.3 writing a SOCKS client using Python
+
+## posizionarsi nella vm B (192.168.20.99)
+## settare il tunnel ssh da B ad A
+ssh -D 0.0.0.0:9000 seed@10.8.0.99
+
+## testare l'accesso al sito http://www.example.com dagli hosts B, B1, B2
+python3 socks_client.py
