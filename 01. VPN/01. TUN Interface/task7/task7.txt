@@ -1,0 +1,28 @@
+Task 7.
+
+In an real VPN system, the traffic will be encrypted (this part is not covered in this lab). That means the
+return traffic must come back from the same tunnel. How to get the return traffic from Host V to the VPN
+server is non-trivial. Our setup simplifies the situation. In our setup, Host V’s routing table has a default
+setting: packets going to any destination, except the 192.168.60.0/24 network, will be automatically
+routed to the VPN server.
+
+In the real world, Host V may be a few hops away from the VPN server, and the default routing entry
+may not guarantee to route the return packet back to the VPN server. Routing tables inside a private network
+have to be set up properly to ensure that packets going to the other end of the tunnel will be routed to the
+VPN server. To simulate this scenario, we will remove the default entry from Host V, and add a more specific
+entry to the routing table, so the return packets can be routed back to the VPN server. Students can use the
+following commands to remove the default entry and add a new entry:
+
+// Delete the default entry
+# ip route del default
+
+// Add an entry
+# ip route add <network prefix> via <router ip>
+
+-------------------------------------------------
+
+Comandi da eseguire nell'Host V:
+
+ip route del default
+
+ip route add 192.168.53.0/24 via 192.168.60.11
